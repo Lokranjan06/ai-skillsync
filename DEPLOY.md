@@ -39,7 +39,7 @@ In the Render dashboard for your service:
 | `DATABASE_URL` | `sqlite:///./skillsync.db` | SQLite database (default) |
 | | OR for PostgreSQL: | |
 | | `postgresql+psycopg2://user:pass@host/dbname` | Use if you want PostgreSQL |
-| `PYTHON_VERSION` | `3.11` | Python version |
+**Note:** No need to set `PYTHON_VERSION` environment variable - Render automatically detects it from `runtime.txt`!
 
 > **Note:** This app works with SQLite (file-based) by default, so you don't need to set up a database server!
 
@@ -99,7 +99,7 @@ heroku buildpacks:set heroku/python
 ### Step 4: Add Environment Variables
 ```bash
 heroku config:set DATABASE_URL=sqlite:///./skillsync.db
-heroku config:set PYTHON_VERSION=3.11
+heroku config:set PYTHON_VERSION=3.11.0.0
 ```
 
 ### Step 5: Deploy
@@ -119,7 +119,7 @@ heroku open
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `DATABASE_URL` | No | `sqlite:///./skillsync.db` | Database connection string |
-| `PYTHON_VERSION` | No | `3.11` | Python version to use |
+| `PYTHON_VERSION` | No | `3.11.0` | Python version to use |
 
 ### Database Options:
 - **SQLite** (default - no setup needed): `sqlite:///./skillsync.db`
