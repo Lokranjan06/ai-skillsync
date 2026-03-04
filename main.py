@@ -75,7 +75,34 @@ app.include_router(simulation.router,   prefix=API_PREFIX, tags=["Digital Twin"]
 app.include_router(dashboard.router,    prefix=API_PREFIX, tags=["Dashboard"])
 
 
-@app.get("/", tags=["Health"])
+@app.get("/", tags=["Root"])
+def root():
+    """Root endpoint with API information."""
+    return {
+        "status": "online",
+        "message": "AI SkillSync API is running",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "endpoints": {
+            "health": "/health",
+            "burnout": "POST /api/burnout-risk",
+            "simulation": "POST /api/simulate-score",
+            "resume": "POST /api/extract-resume",
+            "planner": "POST /api/generate-plan",
+            "readiness": "GET /api/readiness/{user_id}/{career_id}",
+            "skill_gap": "GET /api/skill-gap/{user_id}/{career_id}",
+            "skill_graph": "GET /api/skill-graph/{career_id}",
+            "dashboard": "GET /api/dashboard/{user_id}"
+        }
+    }
+
+
+@app.get("/health", tags=["Health"])
 def health_check():
-    """Quick liveness probe."""
-    return {"status": "ok", "service": "AI SkillSync", "version": "1.0.0"}
+    """Detailed health check endpoint."""
+    from datetime import datetime
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "service": "AI SkillSync"
+    }

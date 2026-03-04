@@ -22,3 +22,5 @@ def generate_plan(request: PlannerRequest, db: Session = Depends(get_db)):
         return _engine.generate_plan(db, request)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Planner error: {str(e)}")

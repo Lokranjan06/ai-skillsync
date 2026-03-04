@@ -71,9 +71,12 @@ class ResumeExtractor:
     @staticmethod
     def _pdf_to_text(file_bytes: bytes) -> str:
         """Extract all text from all pages of a PDF."""
-        reader = PdfReader(BytesIO(file_bytes))
-        pages  = [page.extract_text() or "" for page in reader.pages]
-        return " ".join(pages)
+        try:
+            reader = PdfReader(BytesIO(file_bytes))
+            pages  = [page.extract_text() or "" for page in reader.pages]
+            return " ".join(pages)
+        except Exception as e:
+            raise ValueError(f"Failed to parse PDF: {str(e)}")
 
     @staticmethod
     def _normalise(text: str) -> str:

@@ -25,4 +25,7 @@ def get_dashboard(user_id: int, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail=f"User {user_id} not found")
 
-    return _service.get_dashboard(db, user_id)
+    try:
+        return _service.get_dashboard(db, user_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Dashboard error: {str(e)}")

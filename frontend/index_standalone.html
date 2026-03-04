@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI SkillSync - Career Intelligence Dashboard</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- D3.js -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
+    <style>
+/* AI SkillSync - Frontend Styles */
+
+:root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --secondary: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --dark: #1f2937;
+    --light: #f9fafb;
+    --gray: #6b7280;
+    --card-bg: #ffffff;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --radius: 12px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: var(--dark);
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: var(--light);
+    border-radius: var(--radius);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    padding: 30px;
+    min-height: 90vh;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: var(--gray);
+    font-size: 1.1rem;
+    margin-top: 8px;
+}
+
+/* Cards */
+.card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+}
+
+.card h2, .card h3 {
+    color: var(--dark);
+    margin-bottom: 16px;
+    font-size: 1.3rem;
+}
+
+/* Forms */
+.form-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--gray);
+}
+
+.form-group select,
+.form-group input {
+    padding: 10px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+button {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* Grid Layouts */
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* Dashboard Section */
+.score-display {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin: 0 auto;
+}
+
+.score-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+/* Skill Gap Grid */
+.gap-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.gap-column {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.gap-column h4 {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid;
+}
+
+.gap-column h4.strong {
+    color: var(--secondary);
+    border-color: var(--secondary);
+}
+
+.gap-column h4.weak {
+    color: var(--warning);
+    border-color: var(--warning);
+}
+
+.gap-column h4.missing {
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+.gap-column ul {
+    list-style: none;
+}
+
+.gap-column li {
+    padding: 8px 0;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 0.95rem;
+}
+
+.gap-column li:last-child {
+    border-bottom: none;
+}
+
+/* Skill Graph Container */
+#graphContainer {
+    width: 100%;
+    height: 500px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#graphContainer svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* D3.js Graph Styles */
+.node circle {
+    stroke: #fff;
+    stroke-width: 2px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.node circle:hover {
+    transform: scale(1.2);
+}
+
+.node text {
+    font-size: 11px;
+    fill: var(--dark);
+    pointer-events: none;
+}
+
+.link {
+    stroke: #9ca3af;
+    stroke-opacity: 0.6;
+}
+
+/* Plan Results */
+#planResults {
+    margin-top: 20px;
+}
+
+.task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    border-left: 4px solid var(--primary);
+}
+
+.task-item .priority {
+    background: var(--primary);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+}
+
+.task-item .skill-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.task-item .reason {
+    color: var(--gray);
+    font-size: 0.9rem;
+    margin-top: 4px;
+}
+
+/* Burnout Result */
+#burnoutResult {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+#burnoutResult.low {
+    background: #d1fae5;
+    border: 2px solid var(--secondary);
+}
+
+#burnoutResult.medium {
+    background: #fef3c7;
+    border: 2px solid var(--warning);
+}
+
+#burnoutResult.high {
+    background: #fee2e2;
+    border: 2px solid var(--danger);
+}
+
+#burnoutResult .risk-score {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+#burnoutResult .risk-level {
+    font-size: 1.5rem;
+    margin: 10px 0;
+}
+
+#burnoutResult .advice {
+    color: var(--gray);
+    margin-top: 10px;
+}
+
+/* Simulation Result */
+#simulationResult {
+    margin-top: 20px;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    text-align: center;
+    color: white;
+}
+
+#simulationResult .predicted-score {
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+/* Tabs Navigation */
+.tabs {
+    display: flex;
+    gap: 8px;
+    margin-top: 30px;
+    padding: 16px;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+}
+
+.tab {
+    padding: 12px 20px;
+    background: transparent;
+    color: var(--gray);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.tab:hover {
+    background: #f3f4f6;
+    color: var(--dark);
+}
+
+.tab.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* Loading State */
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--gray);
+}
+
+.loading::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #e5e7eb;
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 16px;
+    }
+
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .gap-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tabs {
+        flex-wrap: nowrap;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 AI SkillSync</h1>
+            <p class="subtitle">Career Intelligence & Learning Management System</p>
+        </header>
+
+        <!-- User Selection -->
+        <section class="card" id="user-section">
+            <h2>Select User & Career</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="userId">User ID:</label>
+                    <select id="userId">
+                        <option value="1">User 1</option>
+                        <option value="2">User 2</option>
+                        <option value="3">User 3</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="careerId">Career Path:</label>
+                    <select id="careerId">
+                        <option value="1">Software Engineer</option>
+                        <option value="2">Data Scientist</option>
+                        <option value="3">Product Manager</option>
+                    </select>
+                </div>
+                <button onclick="loadDashboard()">Load Dashboard</button>
+            </div>
+        </section>
+
+        <!-- Dashboard Overview -->
+        <section class="grid-2" id="dashboard-section" style="display: none;">
+            <!-- Readiness Score -->
+            <div class="card">
+                <h3>📊 Career Readiness</h3>
+                <div class="score-display">
+                    <canvas id="readinessChart"></canvas>
+                    <div class="score-text" id="readinessScore">--%</div>
+                </div>
+                <p id="readinessLabel">Loading...</p>
+            </div>
+
+            <!-- Study Hours -->
+            <div class="card">
+                <h3>📅 Weekly Study Hours</h3>
+                <canvas id="weeklyHoursChart"></canvas>
+            </div>
+
+            <!-- Skill Progress -->
+            <div class="card">
+                <h3>📈 Skill Progress</h3>
+                <canvas id="skillProgressChart"></canvas>
+            </div>
+
+            <!-- Focus Distribution -->
+            <div class="card">
+                <h3>🎯 Focus Score Distribution</h3>
+                <canvas id="focusChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Skill Gap Analysis -->
+        <section class="card" id="skillgap-section" style="display: none;">
+            <h3>🔍 Skill Gap Analysis</h3>
+            <div class="gap-grid">
+                <div class="gap-column">
+                    <h4 class="strong">💪 Strong Skills</h4>
+                    <ul id="strongSkills"></ul>
+                </div>
+                <div class="gap-column">
+                    <h4 class="weak">⚠️ Weak Skills</h4>
+                    <ul id="weakSkills"></ul>
+                </div>
+                <div class="gap-column">
+                    <h4 class="missing">❌ Missing Skills</h4>
+                    <ul id="missingSkills"></ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skill Graph (D3.js) -->
+        <section class="card" id="skillgraph-section" style="display: none;">
+            <h3>🕸️ Skill Graph (D3.js Force-Directed)</h3>
+            <div id="graphContainer"></div>
+        </section>
+
+        <!-- Study Planner -->
+        <section class="card" id="planner-section" style="display: none;">
+            <h3>📋 Adaptive Study Planner</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="examDays">Days Until Exam:</label>
+                    <input type="number" id="examDays" value="30" min="1" max="365">
+                </div>
+                <button onclick="generatePlan()">Generate Plan</button>
+            </div>
+            <div id="planResults"></div>
+        </section>
+
+        <!-- Burnout Risk -->
+        <section class="card" id="burnout-section" style="display: none;">
+            <h3>🧘 Burnout Risk Assessment</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="sleepHours">Sleep Hours (0-24):</label>
+                    <input type="number" id="sleepHours" value="7" min="0" max="24" step="0.5">
+                </div>
+                <div class="form-group">
+                    <label for="studyHours">Study Hours (0-24):</label>
+                    <input type="number" id="studyHours" value="6" min="0" max="24" step="0.5">
+                </div>
+                <div class="form-group">
+                    <label for="focusScore">Focus Score (0-100):</label>
+                    <input type="number" id="focusScore" value="75" min="0" max="100">
+                </div>
+                <button onclick="checkBurnout()">Check Risk</button>
+            </div>
+            <div id="burnoutResult"></div>
+        </section>
+
+        <!-- Digital Twin Simulation -->
+        <section class="card" id="simulation-section" style="display: none;">
+            <h3>🔮 Digital Twin - Score Prediction</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="simStudyHours">Study Hours:</label>
+                    <input type="number" id="simStudyHours" value="20" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="simFocus">Focus Score (0-100):</label>
+                    <input type="number" id="simFocus" value="80" min="0" max="100">
+                </div>
+                <div class="form-group">
+                    <label for="simRevision">Revision Frequency (times/week):</label>
+                    <input type="number" id="simRevision" value="3" min="0">
+                </div>
+                <button onclick="simulateScore()">Predict Score</button>
+            </div>
+            <div id="simulationResult"></div>
+        </section>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs">
+            <button class="tab active" onclick="showSection('dashboard')">Dashboard</button>
+            <button class="tab" onclick="showSection('skillgap')">Skill Gap</button>
+            <button class="tab" onclick="showSection('skillgraph')">Skill Graph</button>
+            <button class="tab" onclick="showSection('planner')">Planner</button>
+            <button class="tab" onclick="showSection('burnout')">Burnout</button>
+            <button class="tab" onclick="showSection('simulation')">Simulation</button>
+        </nav>
+    </div>
+
+    <script>
+// AI SkillSync - Frontend Application
+// Connects to FastAPI backend with Chart.js and D3.js visualizations
+
+// Dynamic API base URL - uses current host for production compatibility
+const API_BASE = window.location.origin + '/api';
+
+// Chart.js instances
+let readinessChart = null;
+let weeklyHoursChart = null;
+let skillProgressChart = null;
+let focusChart = null;
+
+// D3.js simulation
+let simulation = null;
+
+// ============================================================================
+// Section Navigation
+// ============================================================================
+
+function showSection(sectionName) {
+    // Hide all sections
+    document.getElementById('dashboard-section').style.display = 'none';
+    document.getElementById('skillgap-section').style.display = 'none';
+    document.getElementById('skillgraph-section').style.display = 'none';
+    document.getElementById('planner-section').style.display = 'none';
+    document.getElementById('burnout-section').style.display = 'none';
+    document.getElementById('simulation-section').style.display = 'none';
+
+    // Show selected section
+    const sectionMap = {
+        'dashboard': 'dashboard-section',
+        'skillgap': 'skillgap-section',
+        'skillgraph': 'skillgraph-section',
+        'planner': 'planner-section',
+        'burnout': 'burnout-section',
+        'simulation': 'simulation-section'
+    };
+
+    const sectionId = sectionMap[sectionName];
+    if (sectionId) {
+        document.getElementById(sectionId).style.display = 'block';
+    }
+
+    // Update tab active state
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    event.target.classList.add('active');
+
+    // Load data based on section
+    if (sectionName === 'dashboard') {
+        loadDashboard();
+    } else if (sectionName === 'skillgap') {
+        loadSkillGap();
+    } else if (sectionName === 'skillgraph') {
+        loadSkillGraph();
+    } else if (sectionName === 'planner') {
+        // Planner section ready for input
+    } else if (sectionName === 'burnout') {
+        // Burnout section ready for input
+    } else if (sectionName === 'simulation') {
+        // Simulation section ready for input
+    }
+}
+
+// ============================================================================
+// Dashboard Functions
+// ============================================================================
+
+async function loadDashboard() {
+    const userId = document.getElementById('userId').value;
+    const careerId = document.getElementById('careerId').value;
+
+    try {
+        // Load all dashboard data in parallel
+        const [dashboardData, readinessData] = await Promise.all([
+            fetch(`${API_BASE}/dashboard/${userId}`).then(r => r.json()),
+            fetch(`${API_BASE}/readiness/${userId}/${careerId}`).then(r => r.json())
+        ]);
+
+        showSection('dashboard');
+        document.getElementById('dashboard-section').style.display = 'grid';
+
+        renderReadinessChart(readinessData);
+        renderWeeklyHoursChart(dashboardData.weekly_hours);
+        renderSkillProgressChart(dashboardData.skill_progress);
+        renderFocusChart(dashboardData.focus_distribution);
+
+    } catch (error) {
+        console.error('Error loading dashboard:', error);
+        alert('Failed to load dashboard. Make sure the backend is running on port 8000.');
+    }
+}
+
+function renderReadinessChart(data) {
+    const ctx = document.getElementById('readinessChart').getContext('2d');
+
+    if (readinessChart) {
+        readinessChart.destroy();
+    }
+
+    readinessChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Ready', 'Not Ready'],
+            datasets: [{
+                data: [data.readiness_score * 100, 100 - (data.readiness_score * 100)],
+                backgroundColor: ['#6366f1', '#e5e7eb'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    document.getElementById('readinessScore').textContent = `${data.percentage.toFixed(1)}%`;
+    document.getElementById('readinessLabel').textContent =
+        `${data.career_title} - Skills Assessed: ${data.skills_assessed}`;
+}
+
+function renderWeeklyHoursChart(data) {
+    const ctx = document.getElementById('weeklyHoursChart').getContext('2d');
+
+    if (weeklyHoursChart) {
+        weeklyHoursChart.destroy();
+    }
+
+    weeklyHoursChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.map(d => d.week),
+            datasets: [{
+                label: 'Study Hours',
+                data: data.map(d => d.hours),
+                backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Hours'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderSkillProgressChart(data) {
+    const ctx = document.getElementById('skillProgressChart').getContext('2d');
+
+    if (skillProgressChart) {
+        skillProgressChart.destroy();
+    }
+
+    skillProgressChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: data.map(d => d.skill_name),
+            datasets: [{
+                label: 'Skill Level',
+                data: data.map(d => d.skill_level * 100),
+                backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                borderColor: '#10b981',
+                pointBackgroundColor: '#10b981',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#10b981'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        stepSize: 20
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderFocusChart(data) {
+    const ctx = document.getElementById('focusChart').getContext('2d');
+
+    if (focusChart) {
+        focusChart.destroy();
+    }
+
+    focusChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.map(d => d.range),
+            datasets: [{
+                label: 'Sessions',
+                data: data.map(d => d.count),
+                backgroundColor: [
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(99, 102, 241, 0.8)',
+                    'rgba(16, 185, 129, 0.8)'
+                ],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Count'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Focus Score Range'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ============================================================================
+// Skill Gap Functions
+// ============================================================================
+
+async function loadSkillGap() {
+    const userId = document.getElementById('userId').value;
+    const careerId = document.getElementById('careerId').value;
+
+    try {
+        const data = await fetch(`${API_BASE}/skill-gap/${userId}/${careerId}`)
+            .then(r => r.json());
+
+        document.getElementById('skillgap-section').style.display = 'block';
+
+        // Render strong skills
+        const strongList = document.getElementById('strongSkills');
+        strongList.innerHTML = data.strong.map(skill =>
+            `<li>${skill.skill_name} (${(skill.skill_level * 100).toFixed(0)}%)</li>`
+        ).join('');
+
+        // Render weak skills
+        const weakList = document.getElementById('weakSkills');
+        weakList.innerHTML = data.weak.map(skill =>
+            `<li>${skill.skill_name} (${(skill.skill_level * 100).toFixed(0)}%)</li>`
+        ).join('');
+
+        // Render missing skills
+        const missingList = document.getElementById('missingSkills');
+        missingList.innerHTML = data.missing.map(skill =>
+            `<li>${skill.skill_name}</li>`
+        ).join('');
+
+    } catch (error) {
+        console.error('Error loading skill gap:', error);
+    }
+}
+
+// ============================================================================
+// Skill Graph Functions (D3.js)
+// ============================================================================
+
+async function loadSkillGraph() {
+    const careerId = document.getElementById('careerId').value;
+
+    try {
+        const data = await fetch(`${API_BASE}/skill-graph/${careerId}`)
+            .then(r => r.json());
+
+        document.getElementById('skillgraph-section').style.display = 'block';
+
+        renderD3Graph(data);
+
+    } catch (error) {
+        console.error('Error loading skill graph:', error);
+    }
+}
+
+function renderD3Graph(data) {
+    const container = document.getElementById('graphContainer');
+    container.innerHTML = '';
+
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    // Color scale based on node type
+    const colorScale = {
+        'subject': '#6366f1',
+        'skill': '#10b981',
+        'career': '#f59e0b'
+    };
+
+    // Create SVG
+    const svg = d3.select('#graphContainer')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
+
+    // Create links
+    const links = data.links.map(link => ({
+        source: link.source,
+        target: link.target,
+        weight: link.weight
+    }));
+
+    // Create nodes with positions
+    const nodes = data.nodes.map(node => ({
+        ...node,
+        x: width / 2 + (Math.random() - 0.5) * 200,
+        y: height / 2 + (Math.random() - 0.5) * 200
+    }));
+
+    // Create force simulation
+    simulation = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links).id(d => d.id).distance(100))
+        .force('charge', d3.forceManyBody().strength(-300))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('collision', d3.forceCollide().radius(30));
+
+    // Draw links
+    const link = svg.append('g')
+        .selectAll('line')
+        .data(links)
+        .enter()
+        .append('line')
+        .attr('class', 'link')
+        .attr('stroke-width', d => Math.sqrt(d.weight) * 2);
+
+    // Draw nodes
+    const node = svg.append('g')
+        .selectAll('.node')
+        .data(nodes)
+        .enter()
+        .append('g')
+        .attr('class', 'node')
+        .call(d3.drag()
+            .on('start', dragstarted)
+            .on('drag', dragged)
+            .on('end', dragended));
+
+    node.append('circle')
+        .attr('r', d => d.type === 'career' ? 20 : (d.type === 'subject' ? 15 : 12))
+        .attr('fill', d => colorScale[d.type] || '#6b7280');
+
+    node.append('text')
+        .text(d => d.label)
+        .attr('dx', 15)
+        .attr('dy', 4);
+
+    // Add tooltips
+    node.append('title')
+        .text(d => `${d.label} (${d.type})`);
+
+    // Update positions on each tick
+    simulation.on('tick', () => {
+        link
+            .attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+
+        node.attr('transform', d => `translate(${d.x},${d.y})`);
+    });
+
+    function dragstarted(event) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        event.subject.fx = event.subject.x;
+        event.subject.fy = event.subject.y;
+    }
+
+    function dragged(event) {
+        event.subject.fx = event.x;
+        event.subject.fy = event.y;
+    }
+
+    function dragended(event) {
+        if (!event.active) simulation.alphaTarget(0);
+        event.subject.fx = null;
+        event.subject.fy = null;
+    }
+}
+
+// ============================================================================
+// Study Planner Functions
+// ============================================================================
+
+async function generatePlan() {
+    const userId = document.getElementById('userId').value;
+    const careerId = document.getElementById('careerId').value;
+    const examDays = document.getElementById('examDays').value;
+
+    try {
+        const response = await fetch(`${API_BASE}/generate-plan`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_id: parseInt(userId),
+                career_id: parseInt(careerId),
+                exam_days_left: parseInt(examDays),
+                top_n: 5
+            })
+        });
+
+        const data = await response.json();
+
+        const planResults = document.getElementById('planResults');
+        planResults.innerHTML = `
+            <h4>Your Study Plan (${examDays} days remaining)</h4>
+            ${data.tasks.map((task, index) => `
+                <div class="task-item">
+                    <div>
+                        <div class="skill-name">${index + 1}. ${task.skill_name}</div>
+                        <div class="reason">${task.reason}</div>
+                        <div style="margin-top: 8px; font-size: 0.9rem;">
+                            Current Level: ${(task.skill_level * 100).toFixed(0)}% | 
+                            Weight: ${task.weight.toFixed(2)}
+                        </div>
+                    </div>
+                    <span class="priority">Priority: ${(task.priority * 100).toFixed(0)}%</span>
+                </div>
+            `).join('')}
+
+            <div style="margin-top: 20px; padding: 16px; background: #f3f4f6; border-radius: 8px;">
+                <strong>Total Tasks:</strong> ${data.tasks.length} |
+                <strong>Top Priority:</strong> ${data.tasks[0]?.skill_name || 'N/A'}
+            </div>
+        `;
+
+    } catch (error) {
+        console.error('Error generating plan:', error);
+        alert('Failed to generate study plan');
+    }
+}
+
+// ============================================================================
+// Burnout Risk Functions
+// ============================================================================
+
+async function checkBurnout() {
+    const userId = document.getElementById('userId').value;
+    const sleepHours = parseFloat(document.getElementById('sleepHours').value);
+    const studyHours = parseFloat(document.getElementById('studyHours').value);
+    const focusScore = parseFloat(document.getElementById('focusScore').value);
+
+    try {
+        const response = await fetch(`${API_BASE}/burnout-risk`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_id: parseInt(userId),
+                sleep_hours: sleepHours,
+                study_hours: studyHours,
+                focus_score: focusScore
+            })
+        });
+
+        const data = await response.json();
+
+        const resultDiv = document.getElementById('burnoutResult');
+        resultDiv.className = data.risk_level.toLowerCase();
+        resultDiv.innerHTML = `
+            <div class="risk-score">${(data.risk_score * 100).toFixed(0)}%</div>
+            <div class="risk-level">${data.risk_level} Risk</div>
+            <div class="advice">${data.advice}</div>
+        `;
+
+    } catch (error) {
+        console.error('Error checking burnout:', error);
+        alert('Failed to assess burnout risk');
+    }
+}
+
+// ============================================================================
+// Digital Twin Simulation Functions
+// ============================================================================
+
+async function simulateScore() {
+    const studyHours = parseFloat(document.getElementById('simStudyHours').value);
+    const focus = parseFloat(document.getElementById('simFocus').value);
+    const revision = parseInt(document.getElementById('simRevision').value);
+
+    try {
+        const response = await fetch(`${API_BASE}/simulate-score`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                study_hours: studyHours,
+                focus_score: focus,
+                revision_frequency: revision
+            })
+        });
+
+        const data = await response.json();
+
+        const resultDiv = document.getElementById('simulationResult');
+        resultDiv.innerHTML = `
+            <div class="predicted-score">${data.predicted_score.toFixed(1)}%</div>
+            <div>Predicted Score</div>
+            <div style="margin-top: 16px; opacity: 0.9;">
+                ${data.confidence_note}
+            </div>
+            <div style="margin-top: 12px; font-size: 0.9rem; opacity: 0.8;">
+                Input: ${studyHours}h study, ${focus}% focus, ${revision}x revision/week
+            </div>
+        `;
+
+    } catch (error) {
+        console.error('Error simulating score:', error);
+        alert('Failed to simulate score. Make sure the prediction engine is initialized.');
+    }
+}
+
+// ============================================================================
+// Initialize
+// ============================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Load default data on page load
+    console.log('AI SkillSync Frontend loaded');
+    console.log('API Base URL:', API_BASE);
+});
+</script>
+</body>
+</html>

@@ -49,7 +49,9 @@ class PlannerEngine:
 
         for cs in career_skills:
             level    = progress_map.get(cs.skill_id, 0.0)
-            priority = (1 - level) * cs.weight * (1 / request.exam_days_left)
+            # Prevent division by zero - use minimum of 1 day
+            days_factor = max(1, request.exam_days_left)
+            priority = (1 - level) * cs.weight * (1 / days_factor)
             scored.append((priority, cs, level))
 
         # Sort descending by priority

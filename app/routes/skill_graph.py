@@ -21,3 +21,5 @@ def get_skill_graph(career_id: int, db: Session = Depends(get_db)):
         return _engine.build_graph(db, career_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Graph error: {str(e)}")

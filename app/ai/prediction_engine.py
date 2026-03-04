@@ -19,7 +19,7 @@ Why Linear Regression?
 """
 
 import numpy as np
-from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
@@ -28,15 +28,20 @@ from app.schemas.schemas import SimulationRequest, SimulationResponse
 
 class PredictionEngine:
     """
-    Wraps a scikit-learn pipeline (scaler + linear model).
+    Wraps a scikit-learn pipeline (scaler + GradientBoosting model).
     Thread-safe for reads once trained.
     """
 
     def __init__(self):
-        # Pipeline: StandardScaler → LinearRegression
+        # Pipeline: StandardScaler → GradientBoostingRegressor
         self.pipeline = Pipeline([
             ("scaler", StandardScaler()),
-            ("model",  LinearRegression()),
+            ("model", GradientBoostingRegressor(
+                n_estimators=100,
+                max_depth=4,
+                learning_rate=0.1,
+                random_state=42
+            )),
         ])
         self._trained = False
 
@@ -93,7 +98,8 @@ class PredictionEngine:
         return SimulationResponse(
             predicted_score=clamped_score,
             confidence_note=(
-                "Score predicted by a Linear Regression model trained on synthetic data. "
+                "Score predicted by a Gradient Boosting model trained on synthetic data. "
+                "Model uses ensemble learning for better accuracy. "
                 "Accuracy improves as real study_log data is used for retraining."
             ),
             input_summary={
